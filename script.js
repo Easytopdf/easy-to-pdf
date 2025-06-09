@@ -115,3 +115,24 @@ function applyCrop() {
     document.getElementById("imagePreview").innerHTML = "";
     imagePreview.appendChild(croppedCanvas);
 }
+function downloadFile(data, filename, type) {
+    const blob = new Blob([data], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Example: Download as PDF
+function convertToPDF() {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    
+    // Add image to PDF
+    pdf.addImage(imgData, 'JPEG', 10, 10, 180, 120);
+    
+    // Download
+    const pdfBytes = pdf.output('blob');
+    downloadFile(pdfBytes, 'enhanced.pdf', 'application/pdf');
