@@ -1,138 +1,113 @@
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-    background: #f5f5f5;
-    transition: background 0.3s;
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const imagePanel = document.getElementById('imagePanel');
+const controls = document.getElementById('controls');
+const cropBtn = document.getElementById('cropBtn');
+const rotateBtn = document.getElementById('rotateBtn');
+const sizeRange = document.getElementById('sizeRange');
+const brightnessRange = document.getElementById('brightnessRange');
+const contrastRange = document.getElementById('contrastRange');
+const generatePDF = document.getElementById('generatePDF');
+const modeToggle = document.getElementById('modeToggle');
+
+let images = [], currentIdx = null, cropper = null;
+
+function initDarkMode() {
+  if (localStorage.getItem('mode') === 'dark') {
+    document.body.classList.add('dark');
+    modeToggle.textContent = '☀';
+  }
+}
+modeToggle.onclick = () => {
+  document.body.classList.toggle('dark');
+  modeToggle.textContent = document.body.classList.contains('dark') ? '☀' : '🌙';
+  localStorage.setItem('mode', document.body.classList.contains('dark') ? 'dark' : 'light');
+};
+initDarkMode();
+
+dropZone.onclick = () => fileInput.click();
+dropZone.ondrop = e => { e.preventDefault(); e.stopPropagation(); handleFiles(e.dataTransfer.files); };
+dropZone.ondragover = e => { e.preventDefault(); e.stopPropagation(); };
+
+fileInput.onchange = e => handleFiles(e.target.files);
+function handleFiles(files) {
+  for (let file of files) {
+    const url = URL.createObjectURL(file);
+    images.push({ file, url, filters: { brightness: 100, contrast: 100 }, rotation: 0, cropped: false });
+    renderImages();
+  }
 }
 
-body.dark-mode {
-    background: #222;
-    color: #fff;
+function renderImages() {
+  imagePanel.innerHTML = '';
+  images.forEach((img, idx) => {
+    const el = document.createElement('img');
+    el.src = img.url;
+    if (idx === currentIdx) el.classList.add('selected');
+    el.onclick = () => selectImage(idx);
+    imagePanel.appendChild(el);
+  });
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+function selectImage(idx) {
+  currentIdx = idx;
+  renderImages();
+  controls.style.display = 'block';
+  const img = images[idx];
+  if (cropper) { cropper.destroy(); cropper = null; }
+  const el = imagePanel.children[idx];
+  el.classList.add('selected');
+  cropper = new Cropper(el, { autoCropArea: 1, viewMode: 1 });
+  sizeRange.value = el.width;
+  brightnessRange.value = img.filters.brightness;
+  contrastRange.value = img.filters.contrast;
 }
 
-.dark-mode .container {
-    background: #333;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-}
+cropBtn.onclick = () => {
+  if (!cropper) return;
+  const canvas = cropper.getCroppedCanvas();
+  const url = canvas.toDataURL();
+  const el = imagePanel.children[currentIdx];
+  el.src = url;
+  images[currentIdx].url = url;
+  cropper.destroy();
+  cropper = null;
+};
 
-h1 {
-    color: #2c3e50;
-}
+rotateBtn.onclick = () => {
+  const img = images[currentIdx];
+  img.rotation = (img.rotation + 90) % 360;
+  const el = imagePanel.children[currentIdx];
+  el.style.transform = rotate(${img.rotation}deg);
+};
 
-.dark-mode h1 {
-    color: #fff;
-}
-
-.upload-area {
-    border: 2px dashed #3498db;
-    padding: 30px;
-    margin: 20px 0;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.upload-area:hover {
-    background: #f0f8ff;
-}
-
-.dark-mode .upload-area:hover {
-    background: #444;
-}
-
-#imagePreview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 20px 0;
-}
-
-.preview-image {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    cursor: move;
-}
-
-button {
-    background: #3498db;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin: 5px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-button:hover {
-    background: #2980b9;
-}
-
-#themeToggle {
-    background: #555;
-}
-
-.hint {
-    color: #777;
-    font-size: 14px;
-}
-
-.dark-mode .hint {
-    color: #aaa;
-}
-
-#status {
-    margin-top: 20px;
-    font-weight: bold;
-    color: #27ae60;
-}
-// Add Cropper.js library (in HTML head)
-<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-
-// Initialize Cropper
-let cropper;
-document.getElementById("cropBtn").addEventListener("click", function() {
-    const img = document.querySelector("#imagePreview img");
-    cropper = new Cropper(img, { aspectRatio: NaN }); // Free-form crop
+[sizeRange, brightnessRange, contrastRange].forEach(el => {
+  el.oninput = () => {
+    if (currentIdx === null) return;
+    const img = images[currentIdx];
+    img.filters[el.id.replace('Range','')] = el.value;
+    const css = brightness(${brightnessRange.value}%) contrast(${contrastRange.value}%);
+    imagePanel.children[currentIdx].style.filter = css;
+    imagePanel.children[currentIdx].style.width = sizeRange.value + 'px';
+  };
 });
 
-// Apply Crop
-function applyCrop() {
-    const croppedCanvas = cropper.getCroppedCanvas();
-    document.getElementById("imagePreview").innerHTML = "";
-    imagePreview.appendChild(croppedCanvas);
-}
-function downloadFile(data, filename, type) {
-    const blob = new Blob([data], { type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-// Example: Download as PDF
-function convertToPDF() {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    
-    // Add image to PDF
-    pdf.addImage(imgData, 'JPEG', 10, 10, 180, 120);
-    
-    // Download
-    const pdfBytes = pdf.output('blob');
-    downloadFile(pdfBytes, 'enhanced.pdf', 'application/pdf');
+generatePDF.onclick = async () => {
+  const pdfDoc = await PDFLib.PDFDocument.create();
+  for (let img of images) {
+    const imgBytes = await fetch(img.url).then(r => r.arrayBuffer());
+    const embedded = img.url.startsWith('data') ?
+      await pdfDoc.embedPng(imgBytes) : await pdfDoc.embedJpg(imgBytes);
+    const page = pdfDoc.addPage();
+    let { width, height } = page.getSize();
+    page.drawImage(embedded, {
+      x: 0, y: 0, width, height, rotate: PDFLib.degrees(img.rotation)
+    });
+  }
+  const bytes = await pdfDoc.save();
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'easy-pdf-tools.pdf';
+  a.click();
+};
