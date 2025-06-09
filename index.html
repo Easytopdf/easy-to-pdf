@@ -1,63 +1,42 @@
 <!DOCTYPE html>
-<html lang="ur" dir="rtl">
+<html lang="ur">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تصاویر سے PDF بنائیں</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Easy PDF Tools – امیجز کو PDF میں پروفیشنل انداز میں کنورٹ کریں" />
+  <title>Easy PDF Tools</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>📄 تصاویر کو PDF میں تبدیل کریں</h1>
-        
-        <!-- ڈارک/لائٹ موڈ سوئچ -->
-        <button id="themeToggle">🌙 ڈارک موڈ</button>
-        
-        <!-- Drag & Drop اپلوڈ ایریا -->
-        <div class="upload-area" id="dropArea">
-            <p>📌 تصاویر یہاں ڈراپ کریں یا فائل منتخب کریں</p>
-            <input type="file" id="imageInput" accept="image/*" multiple>
-        </div>
-        
-        <!-- تصاویر کی پریویو -->
-        <div class="preview" id="imagePreview"></div>
-        
-        <!-- کنٹرولز -->
-        <div class="controls">
-            <button onclick="clearAll()">❌ صاف کریں</button>
-            <button onclick="convertToPDF()">🖨 PDF بنائیں</button>
-        </div>
-        
-        <!-- ترتیب تبدیل کرنے کے لیے (Drag & Drop) -->
-        <p class="hint">ℹ تصاویر کو ترتیب دینے کے لیے کھینچیں (Drag & Drop)</p>
-        
-        <!-- اسٹیٹس میسج -->
-        <p id="status"></p>
+  <header>
+    <h1>Easy PDF Tools</h1>
+    <button id="modeToggle">🌙</button>
+  </header>
+
+  <main>
+    <div id="dropZone">Drag & Drop or Click to Upload Images</div>
+    <input type="file" id="fileInput" accept="image/*" multiple hidden />
+
+    <div id="imagePanel"></div>
+
+    <div id="controls" style="display:none;">
+      <button id="cropBtn">Crop</button>
+      <button id="rotateBtn">Rotate</button>
+      <label>Size:
+        <input type="range" id="sizeRange" min="100" max="1000" />
+      </label>
+      <label>Brightness:
+        <input type="range" id="brightnessRange" min="0" max="200" />
+      </label>
+      <label>Contrast:
+        <input type="range" id="contrastRange" min="0" max="200" />
+      </label>
+      <button id="generatePDF">Download PDF</button>
     </div>
-    
-    <script src="script.js"></script>
+  </main>
+
+  <script src="libs/pdf-lib.min.js"></script>
+  <script src="libs/cropper.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
-<!-- Add these controls to your existing HTML -->
-<div class="advanced-options">
-    <h3>⚙ Advanced Options</h3>
-    
-    <!-- Download Format -->
-    <select id="format">
-        <option value="pdf">PDF</option>
-        <option value="jpg">JPG</option>
-        <option value="png">PNG</option>
-    </select>
-
-    <!-- Filename Input -->
-    <input type="text" id="filename" placeholder="custom-filename">
-
-    <!-- Quality Slider -->
-    <label>Quality: <span id="qualityValue">80%</span></label>
-    <input type="range" id="quality" min="10" max="100" value="80">
-
-    <!-- Crop Tool -->
-    <button id="cropBtn">✂ Crop</button>
-</div>
