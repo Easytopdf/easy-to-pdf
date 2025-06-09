@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تصاویر سے PDF بنائیں</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>📄 تصاویر کو PDF میں تبدیل کریں</h1>
+        
+        <!-- ڈارک/لائٹ موڈ سوئچ -->
+        <button id="themeToggle">🌙 ڈارک موڈ</button>
+        
+        <!-- Drag & Drop اپلوڈ ایریا -->
+        <div class="upload-area" id="dropArea">
+            <p>📌 تصاویر یہاں ڈراپ کریں یا فائل منتخب کریں</p>
+            <input type="file" id="imageInput" accept="image/*" multiple>
+        </div>
+        
+        <!-- تصاویر کی پریویو -->
+        <div class="preview" id="imagePreview"></div>
+        
+        <!-- کنٹرولز -->
+        <div class="controls">
+            <button onclick="clearAll()">❌ صاف کریں</button>
+            <button onclick="convertToPDF()">🖨 PDF بنائیں</button>
+        </div>
+        
+        <!-- ترتیب تبدیل کرنے کے لیے (Drag & Drop) -->
+        <p class="hint">ℹ تصاویر کو ترتیب دینے کے لیے کھینچیں (Drag & Drop)</p>
+        
+        <!-- اسٹیٹس میسج -->
+        <p id="status"></p>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
